@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learning without Boarders | Python Basics Worksheet</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f3f6fb;
+    color: #172033;
+  }
+  .header {
+    background: linear-gradient(135deg, #173b7a, #2458ad);
+    color: white;
+    padding: 28px 18px;
+    text-align: center;
+  }
+  .header h1 { margin: 0 0 8px; font-size: 28px; }
+  .header p { margin: 4px 0; opacity: .95; }
+  .container {
+    width: min(900px, 94%);
+    margin: 24px auto 50px;
+  }
+  .card {
+    background: white;
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 18px;
+    box-shadow: 0 5px 20px rgba(20, 40, 80, .08);
+  }
+  .student-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  label { font-weight: 700; display: block; margin-bottom: 7px; }
+  input {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 16px;
+  }
+  .instruction {
+    background: #eef5ff;
+    border-left: 5px solid #2458ad;
+    padding: 14px;
+    border-radius: 8px;
+    line-height: 1.5;
+  }
+  .question {
+    border: 1px solid #e1e7ef;
+    border-radius: 12px;
+    padding: 17px;
+    margin: 15px 0;
+  }
+  .question-text {
+    font-weight: 700;
+    margin-bottom: 13px;
+    line-height: 1.5;
+  }
+  .options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+  }
+  .option {
+    display: block;
+    border: 1px solid #d6deea;
+    padding: 11px 13px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 400;
+    background: #fafcff;
+  }
+  .option:hover { background: #f0f6ff; }
+  .option input { width: auto; margin-right: 8px; }
+  .submit-btn {
+    width: 100%;
+    border: 0;
+    border-radius: 10px;
+    padding: 15px;
+    font-size: 17px;
+    font-weight: 700;
+    color: white;
+    background: #176b3a;
+    cursor: pointer;
+  }
+  .submit-btn:hover { background: #12562f; }
+  .submit-btn:disabled { opacity: .65; cursor: not-allowed; }
+  #result {
+    display: none;
+    text-align: center;
+    border-radius: 14px;
+    padding: 25px;
+    background: #eaf8ef;
+    border: 2px solid #43a866;
+  }
+  #result h2 { margin-top: 0; }
+  .score { font-size: 36px; font-weight: 800; color: #176b3a; }
+  .status { font-weight: 700; margin: 10px 0; }
+  .review {
+    margin-top: 18px;
+    text-align: left;
+  }
+  .review-item {
+    padding: 10px;
+    margin: 7px 0;
+    border-radius: 7px;
+  }
+  .correct { background: #e8f7ed; }
+  .wrong { background: #fff0f0; }
+  .footer { text-align: center; color: #64748b; font-size: 13px; margin-top: 25px; }
+  .note { font-size: 13px; color: #64748b; margin-top: 8px; }
+  @media (max-width: 650px) {
+    .student-info, .options { grid-template-columns: 1fr; }
+    .header h1 { font-size: 23px; }
+    .card { padding: 16px; }
+  }
+</style>
+</head>
+
+<body>
+<header class="header">
+  <h1>Learning without Boarders</h1>
+  <p><strong>Coding — Beginners</strong></p>
+  <p>Python Basics • Units/Lessons 1–20</p>
+</header>
+
+<main class="container">
+  <section class="card">
+    <h2>Student Information</h2>
+    <div class="student-info">
+      <div>
+        <label for="studentName">Student Name *</label>
+        <input id="studentName" type="text" placeholder="Enter your full name" required>
+      </div>
+      <div>
+        <label for="studentClass">Class *</label>
+        <input id="studentClass" type="text" placeholder="Enter your class" required>
+      </div>
+    </div>
+    <p class="note">Please enter your correct name and class before submitting.</p>
+  </section>
+
+  <section class="card">
+    <div class="instruction">
+      <strong>Instruction:</strong> Choose the correct answer A, B, C, or D for each question.
+      Answer all 30 questions before clicking <strong>Submit Answers</strong>.
+    </div>
+  </section>
+
+  <form id="worksheetForm" class="card">
+    <div id="questions"></div>
+    <button id="submitBtn" class="submit-btn" type="submit">Submit Answers</button>
+  </form>
+
+  <section id="result" class="card">
+    <h2>Worksheet Submitted</h2>
+    <div id="scoreText" class="score"></div>
+    <div id="percentageText"></div>
+    <div id="statusText" class="status"></div>
+    <p id="emailStatus"></p>
+    <div id="review" class="review"></div>
+  </section>
+
+  <div class="footer">Learning without Boarders • Python Basics Worksheet</div>
+</main>
+
+<script>
+/*
+  EMAIL SETUP
+  -----------
+  This worksheet uses EmailJS.
+
+  Replace the three values below after creating your EmailJS account:
+  1. EMAILJS_PUBLIC_KEY
+  2. EMAILJS_SERVICE_ID
+  3. EMAILJS_TEMPLATE_ID
+
+  The worksheet will still mark answers if these are not configured.
+*/
+const EMAILJS_PUBLIC_KEY = "JD6I_4czDlm39KpcO";
+const EMAILJS_SERVICE_ID = "service_a3gbno7";
+const EMAILJS_TEMPLATE_ID = "template_9oxrolw";
+
+const questions = [
+  ["What is Python?", ["A. A web browser","B. A programming language","C. An operating system","D. A database"], "B"],
+  ["Who created Python?", ["A. Bill Gates","B. Mark Zuckerberg","C. Guido van Rossum","D. Steve Jobs"], "C"],
+  ["Which function is used to display information on the screen?", ["A. show()","B. display()","C. print()","D. output()"], "C"],
+  ["What will this code produce? <code>print(\"Hello World\")</code>", ["A. Hello","B. World","C. Hello World","D. \"print\""], "C"],
+  ["Which symbol is used to create a comment in Python?", ["A. //","B. #","C. &lt;!--","D. **"], "B"],
+  ["Which of the following is a valid Python variable?", ["A. 2name","B. student-name","C. student_name","D. student name"], "C"],
+  ["What is the value of <code>age</code>? <pre>age = 15</pre>", ["A. 5","B. 10","C. 15","D. \"age\""], "C"],
+  ["Which data type is <code>\"Python\"</code>?", ["A. Integer","B. Float","C. Boolean","D. String"], "D"],
+  ["Which data type is <code>25</code>?", ["A. String","B. Integer","C. Float","D. Boolean"], "B"],
+  ["Which data type is <code>3.14</code>?", ["A. Integer","B. String","C. Float","D. Boolean"], "C"],
+  ["Which of the following is a Boolean value?", ["A. \"True\"","B. 1","C. True","D. \"Yes\""], "C"],
+  ["Which function is used to receive information from a user?", ["A. get()","B. input()","C. receive()","D. read()"], "B"],
+  ["What does <code>int()</code> do?", ["A. Converts a value to an integer","B. Converts a value to a string","C. Converts a value to a Boolean","D. Deletes a value"], "A"],
+  ["What is the result of <code>10 + 5</code>?", ["A. 15","B. 50","C. 105","D. 5"], "A"],
+  ["Which operator is used for multiplication?", ["A. x","B. *","C. #","D. %"], "B"],
+  ["What is the result of <code>20 / 4</code>?", ["A. 4","B. 5","C. 6","D. 80"], "B"],
+  ["Which operator is used to find the remainder?", ["A. /","B. //","C. %","D. **"], "C"],
+  ["What does <code>**</code> represent in Python?", ["A. Division","B. Multiplication","C. Exponentiation/power","D. Remainder"], "C"],
+  ["What is the result of <code>2 ** 4</code>?", ["A. 6","B. 8","C. 16","D. 24"], "C"],
+  ["Which operator checks whether two values are equal?", ["A. =","B. ==","C. !=","D. ==="], "B"],
+  ["What does the <code>&gt;</code> operator mean?", ["A. Less than","B. Equal to","C. Greater than","D. Not equal to"], "C"],
+  ["Which keyword is used to make a decision in Python?", ["A. if","B. check","C. when","D. decide"], "A"],
+  ["What will this program print? <pre>age = 20\nif age &gt;= 18:\n    print(\"Adult\")\nelse:\n    print(\"Minor\")</pre>", ["A. Minor","B. Adult","C. 20","D. Error"], "B"],
+  ["Which keyword is used when the <code>if</code> condition is false?", ["A. otherwise","B. elif","C. else","D. then"], "C"],
+  ["Which keyword allows you to check another condition?", ["A. elif","B. another","C. check","D. next"], "A"],
+  ["What is a loop used for?", ["A. To delete a program","B. To repeat instructions","C. To create a computer","D. To stop Python"], "B"],
+  ["Which loop is commonly used to repeat through a sequence or range?", ["A. repeat","B. for","C. loop","D. each"], "B"],
+  ["What numbers will this code print? <pre>for i in range(1, 4):\n    print(i)</pre>", ["A. 0, 1, 2","B. 1, 2, 3","C. 1, 2, 3, 4","D. 0, 1, 2, 3"], "B"],
+  ["Which keyword is used to define a function?", ["A. function","B. define","C. def","D. func"], "C"],
+  ["What is the main purpose of a function?", ["A. To repeat/reuse a block of code","B. To turn off Python","C. To delete variables","D. To install Python"], "A"]
+];
+
+const letters = ["A", "B", "C", "D"];
+const questionContainer = document.getElementById("questions");
+
+questions.forEach((q, index) => {
+  const number = index + 1;
+  const div = document.createElement("div");
+  div.className = "question";
+  div.innerHTML = `
+    <div class="question-text">${number}. ${q[0]}</div>
+    <div class="options">
+      ${q[1].map((option, i) => `
+        <label class="option">
+          <input type="radio" name="q${number}" value="${letters[i]}">
+          ${option}
+        </label>
+      `).join("")}
+    </div>
+  `;
+  questionContainer.appendChild(div);
+});
+
+function calculateResult() {
+  let score = 0;
+  let unanswered = 0;
+  const responses = [];
+
+  questions.forEach((q, index) => {
+    const number = index + 1;
+    const selected = document.querySelector(`input[name="q${number}"]:checked`);
+    const answer = selected ? selected.value : "";
+    if (!answer) unanswered++;
+    if (answer === q[2]) score++;
+    responses.push({
+      number,
+      selected: answer || "No answer",
+      correct: q[2],
+      question: q[0].replace(/<[^>]*>/g, " ")
+    });
+  });
+
+  return { score, unanswered, responses };
+}
+
+document.getElementById("worksheetForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  const name = document.getElementById("studentName").value.trim();
+  const studentClass = document.getElementById("studentClass").value.trim();
+
+  if (!name || !studentClass) {
+    alert("Please enter your name and class.");
+    return;
+  }
+
+  const result = calculateResult();
+
+  if (result.unanswered > 0) {
+    const proceed = confirm(
+      `You have ${result.unanswered} unanswered question(s). Do you want to submit anyway?`
+    );
+    if (!proceed) return;
+  }
+
+  const percentage = Math.round((result.score / questions.length) * 100);
+  const status =
+    percentage >= 70 ? "Excellent work!" :
+    percentage >= 50 ? "Good effort. Keep practising!" :
+    "Keep practising and review the Python basics again.";
+
+  document.getElementById("scoreText").textContent =
+    `${result.score} / ${questions.length}`;
+  document.getElementById("percentageText").textContent =
+    `${percentage}%`;
+  document.getElementById("statusText").textContent = status;
+
+  const review = document.getElementById("review");
+  review.innerHTML = "<h3>Answer Review</h3>" +
+    result.responses.map(r => {
+      const isCorrect = r.selected === r.correct;
+      return `<div class="review-item ${isCorrect ? "correct" : "wrong"}">
+        <strong>Question ${r.number}:</strong>
+        ${isCorrect ? "✓ Correct" : `✗ Your answer: ${r.selected} | Correct answer: ${r.correct}`}
+      </div>`;
+    }).join("");
+
+  document.getElementById("result").style.display = "block";
+  document.getElementById("result").scrollIntoView({ behavior: "smooth" });
+
+  const submitBtn = document.getElementById("submitBtn");
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Submitted";
+
+  // Send result by EmailJS if configured.
+  const emailStatus = document.getElementById("emailStatus");
+
+  if (
+    EMAILJS_PUBLIC_KEY !== "YOUR_PUBLIC_KEY" &&
+    EMAILJS_SERVICE_ID !== "YOUR_SERVICE_ID" &&
+    EMAILJS_TEMPLATE_ID !== "YOUR_TEMPLATE_ID"
+  ) {
+    try {
+      emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
+      const answerSummary = result.responses.map(r =>
+        `Q${r.number}: ${r.selected} (Correct: ${r.correct})`
+      ).join("\n");
+
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        student_name: name,
+        student_class: studentClass,
+        subject: "Coding",
+        topic: "Python Basics",
+        score: `${result.score}/${questions.length}`,
+        percentage: `${percentage}%`,
+        answers: answerSummary
+      });
+
+      emailStatus.textContent = "Your result has also been sent to your teacher.";
+    } catch (error) {
+      console.error(error);
+      emailStatus.textContent =
+        "Your score was calculated, but the email submission could not be completed. Please contact your teacher.";
+    }
+  } else {
+    emailStatus.textContent =
+      "Your score has been calculated. Email submission will work after the teacher completes the EmailJS setup.";
+  }
+});
+</script>
+</body>
+</html>
